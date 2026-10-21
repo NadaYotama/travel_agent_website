@@ -78,7 +78,8 @@
                                     <td>{{ $b->created_at->format('d M Y, H:i') }}</td>
                                     <td>
                                         @php
-                                            $badgeClass = match($b->status) {
+                                            $status = $b->status->value;
+                                            $badgeClass = match($status) {
                                                 'confirmed' => 'badge-success',
                                                 'paid'      => 'badge-info',
                                                 'pending'   => 'badge-warning',
@@ -86,7 +87,7 @@
                                                 default     => 'badge-secondary'
                                             };
                                         @endphp
-                                        <span class="badge {{ $badgeClass }} p-2">{{ ucfirst($b->status) }}</span>
+                                        <span class="badge {{ $badgeClass }} p-2">{{ ucfirst($status) }}</span>
                                     </td>
                                 </tr>
                             @empty

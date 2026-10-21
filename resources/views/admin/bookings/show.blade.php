@@ -128,7 +128,7 @@
                                         @endif
                                     </td>
                                     <td class="align-middle text-center">
-                                        @if($pStatus === 'pending' && Route::has('admin.payments.verify'))
+                                        @if($pStatus === 'pending' && $payment->method !== 'midtrans_snap' && Route::has('admin.payments.verify'))
                                             <div class="btn-group" role="group">
                                                 <form action="{{ route('admin.payments.verify', $payment) }}" method="POST" class="d-inline" onsubmit="return confirm('Konfirmasi dan setujui pembayaran ini?');">
                                                     @csrf
@@ -179,7 +179,7 @@
                     @if($bStatus === 'pending')
                         <span class="badge badge-warning text-dark font-14 p-2 px-3">Menunggu Pembayaran</span>
                     @elseif($bStatus === 'paid')
-                        <span class="badge badge-info font-14 p-2 px-3">Menunggu Verifikasi</span>
+                        <span class="badge badge-info font-14 p-2 px-3">Menunggu Konfirmasi Pembayaran</span>
                     @elseif($bStatus === 'confirmed')
                         <span class="badge badge-success font-14 p-2 px-3">Booking Terkonfirmasi</span>
                     @elseif($bStatus === 'completed')
@@ -220,7 +220,7 @@
 
                 <!-- Form Update Booking untuk Admin -->
                 <h5 class="font-weight-bold text-dark font-14 m-b-15 border-top p-t-15">
-                    <i class="mdi mdi-settings m-r-5"></i> Kelola Status & Agen PIC
+                    <i class="mdi mdi-settings m-r-5"></i> Kelola Status & Tour Guide PIC
                 </h5>
 
                 <form action="{{ route('admin.bookings.update', $booking) }}" method="POST">
@@ -242,12 +242,12 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="agent_id" class="font-weight-bold font-13">Pilih Agen PIC</label>
+                        <label for="agent_id" class="font-weight-bold font-13">Pilih Tour Guide PIC</label>
                         <select name="agent_id" id="agent_id" class="form-control">
                             <option value="">-- Belum Ada PIC --</option>
-                            @foreach($agents as $agent)
-                                <option value="{{ $agent->id }}" {{ $booking->agent_id == $agent->id ? 'selected' : '' }}>
-                                    {{ $agent->name }}
+                            @foreach($tourGuides as $tourGuide)
+                                <option value="{{ $tourGuide->id }}" {{ $booking->agent_id == $tourGuide->id ? 'selected' : '' }}>
+                                    {{ $tourGuide->name }}
                                 </option>
                             @endforeach
                         </select>
@@ -267,4 +267,3 @@
     </div>
 </div>
 @endsection
-

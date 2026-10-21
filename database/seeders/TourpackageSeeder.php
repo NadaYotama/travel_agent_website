@@ -7,6 +7,7 @@ use App\Models\Promo;
 use App\Models\TourPackage;
 use App\Models\Vendor;
 use App\Models\VendorService;
+use App\Support\DemoGallery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -55,6 +56,8 @@ class TourPackageSeeder extends Seeder
                 );
             }
 
+            $this->attachPhoto($package);
+
             $serviceIds = collect($data['services'] ?? [])
                 ->filter(fn (string $key) => isset($services[$key]))
                 ->map(fn (string $key) => $services[$key]->id)
@@ -66,6 +69,23 @@ class TourPackageSeeder extends Seeder
         }
 
         $this->seedPromos();
+    }
+
+    /**
+     * Pasang foto contoh bila paket belum punya gambar sama sekali,
+     * supaya unggahan asli dari admin tidak pernah tertimpa.
+     */
+    private function attachPhoto(TourPackage $package): void
+    {
+        if ($package->images()->exists()) {
+            return;
+        }
+
+        $path = DemoGallery::packagePath($package->slug);
+
+        if ($path !== null) {
+            $package->images()->create(['path' => $path]);
+        }
     }
 
     /** @return array<string, VendorService> */

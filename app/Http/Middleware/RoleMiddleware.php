@@ -12,8 +12,12 @@ class RoleMiddleware
     {
         $user = $request->user();
 
-        if (! $user || ! in_array($user->role->value, $roles, true)) {
+        if (! $user) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini.');
+        }
+
+        if (! in_array($user->role->value, $roles, true)) {
+            return redirect()->route($user->role->dashboardRoute());
         }
 
         return $next($request);

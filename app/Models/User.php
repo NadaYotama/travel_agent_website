@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
+use App\Support\Media;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Storage;
 // use Laravel\Sanctum\HasApiTokens; // aktifkan bila nanti membuat API mobile
 
 class User extends Authenticatable // implements MustVerifyEmail
@@ -50,7 +50,7 @@ class User extends Authenticatable // implements MustVerifyEmail
         return $this->hasMany(Booking::class);
     }
 
-    /** Booking yang ditangani user ini sebagai agent. */
+    /** Booking yang ditangani user ini sebagai tour guide. */
     public function handledBookings(): HasMany
     {
         return $this->hasMany(Booking::class, 'agent_id');
@@ -75,6 +75,6 @@ class User extends Authenticatable // implements MustVerifyEmail
 
     public function getAvatarUrlAttribute(): ?string
     {
-        return $this->avatar ? Storage::url($this->avatar) : null;
+        return Media::url($this->avatar);
     }
 }

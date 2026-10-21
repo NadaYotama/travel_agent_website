@@ -10,7 +10,7 @@ class VerifyPaymentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // akses dibatasi middleware role:admin / role:admin,agent pada route
+        return true; // akses dibatasi middleware role:admin / role:tourguide pada route
     }
 
     public function rules(): array

@@ -11,7 +11,7 @@
                 <div class="d-flex no-block align-items-center m-b-20">
                     <div>
                         <h4 class="card-title mb-0">Daftar Akun Pengguna</h4>
-                        <p class="text-muted font-13 mb-0">Kelola akses akun admin, agen wisata, mitra vendor, dan pelanggan.</p>
+                        <p class="text-muted font-13 mb-0">Kelola akses akun admin, manager, tour guide, dan user/customer.</p>
                     </div>
                     <div class="ml-auto">
                         <a href="{{ route('admin.users.create') }}" class="btn btn-success waves-effect waves-light">
@@ -87,12 +87,12 @@
                                         @endphp
                                         @if($roleVal === 'admin')
                                             <span class="badge badge-danger p-2 font-12"><i class="mdi mdi-shield-account m-r-5"></i>Admin</span>
-                                        @elseif($roleVal === 'agent')
-                                            <span class="badge badge-warning text-dark p-2 font-12"><i class="mdi mdi-account-tie m-r-5"></i>Agen</span>
-                                        @elseif($roleVal === 'vendor')
-                                            <span class="badge badge-info p-2 font-12"><i class="mdi mdi-domain m-r-5"></i>Vendor</span>
+                                        @elseif($roleVal === 'tourguide')
+                                            <span class="badge badge-warning text-dark p-2 font-12"><i class="mdi mdi-account-tie m-r-5"></i>Tour Guide</span>
+                                        @elseif($roleVal === 'manager')
+                                            <span class="badge badge-info p-2 font-12"><i class="mdi mdi-domain m-r-5"></i>Manager</span>
                                         @else
-                                            <span class="badge badge-secondary p-2 font-12"><i class="mdi mdi-account m-r-5"></i>Customer</span>
+                                            <span class="badge badge-secondary p-2 font-12"><i class="mdi mdi-account m-r-5"></i>User/Customer</span>
                                         @endif
                                     </td>
                                     <td class="text-center align-middle">
@@ -149,4 +149,3 @@
     </div>
 </div>
 @endsection
-

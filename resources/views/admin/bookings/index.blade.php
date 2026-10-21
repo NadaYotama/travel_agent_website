@@ -61,7 +61,7 @@
                                 <th class="text-center">Peserta</th>
                                 <th>Total Tagihan</th>
                                 <th class="text-center">Status</th>
-                                <th>Agen PIC</th>
+                                <th>Tour Guide PIC</th>
                                 <th class="text-center" style="width: 100px;">Aksi</th>
                             </tr>
                         </thead>
@@ -151,4 +151,3 @@
     </div>
 </div>
 @endsection
-

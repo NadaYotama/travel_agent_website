@@ -41,6 +41,10 @@ class PaymentController extends Controller
     /** Setujui atau tolak pembayaran (bukti transfer). */
     public function verify(Request $request, Payment $payment): RedirectResponse
     {
+        if ($payment->method === 'midtrans_snap') {
+            return back()->with('error', 'Pembayaran Midtrans hanya dapat diperbarui melalui notifikasi resmi Midtrans.');
+        }
+
         $data = $request->validate([
             'decision' => ['required', Rule::in(['approve', 'reject'])],
         ]);

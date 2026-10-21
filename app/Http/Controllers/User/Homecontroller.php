@@ -6,49 +6,70 @@ use App\Enums\BookingStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Destination;
 use App\Models\TourPackage;
+use App\Support\DemoGallery;
+use App\Support\Media;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class HomeController extends Controller
 {
-    /** Halaman publik (welcome.blade.php). Bila data kosong, view memakai data contoh. */
+    /** Jumlah kartu destinasi di halaman depan. */
+    private const DESTINATION_CARDS = 5;
+
+    /** Jumlah kartu paket di halaman depan. */
+    private const PACKAGE_CARDS = 6;
+
+    /** Sisa kuota yang sudah ditandai "Sisa n kursi". */
+    private const LOW_QUOTA = 5;
+
+    /**
+     * Halaman publik (welcome.blade.php).
+     *
+     * Setiap kartu selalu membawa kunci "img_url". Nilainya null bila
+     * destinasi/paket belum punya foto, dan view memakai gambar placeholder.
+     */
     public function welcome(): View
     {
         $destinations = Destination::query()
             ->withCount(['tourPackages as published_count' => fn ($q) => $q->where('is_published', true)])
             ->orderByDesc('published_count')
             ->latest()
-            ->limit(5)
+            ->limit(self::DESTINATION_CARDS)
             ->get()
-            ->map(fn (Destination $d) => [
-                'id'      => $d->id,
-                'name'    => $d->name,
-                'region'  => $d->city ? "{$d->city}, {$d->country}" : $d->country,
-                'img_url' => $d->thumbnail ? Storage::url($d->thumbnail) : null,
-                'count'   => $d->published_count,
-            ]);
+            ->map(fn (Destination $destination) => [
+                'id'      => $destination->id,
+                'name'    => $destination->name,
+                'region'  => $destination->city
+                    ? "{$destination->city}, {$destination->country}"
+                    : $destination->country,
+                'img_url' => $destination->thumbnail_url,
+                'count'   => $destination->published_count,
+            ])
+            ->all();
 
         $packages = TourPackage::query()
             ->where('is_published', true)
             ->with('images')
             ->latest()
-            ->limit(6)
+            ->limit(self::PACKAGE_CARDS)
             ->get()
-            ->map(fn (TourPackage $p) => [
-                'id'      => $p->id,
-                'title'   => $p->title,
-                'days'    => $p->duration_days,
-                'price'   => $p->price,
-                'quota'   => $p->quota,
-                'img_url' => $p->images->first() ? Storage::url($p->images->first()->path) : null,
-                'tag'     => $p->quota <= 5 && $p->quota > 0 ? "Sisa {$p->quota} kursi" : ($p->quota == 0 ? 'Penuh' : 'Pilihan'),
-                'url'     => route('user.packages.show', $p->slug),
-            ]);
+            ->map(fn (TourPackage $package) => [
+                'id'      => $package->id,
+                'title'   => $package->title,
+                'days'    => $package->duration_days,
+                'price'   => $package->price,
+                'quota'   => $package->quota,
+                'img_url' => $package->cover_url,
+                'tag'     => $this->quotaTag($package->quota),
+                'url'     => route('user.packages.show', $package->slug),
+            ])
+            ->all();
 
         return view('welcome', [
-            'destinations' => $destinations->isNotEmpty() ? $destinations->all() : null,
-            'packages'     => $packages->isNotEmpty() ? $packages->all() : null,
+            'destinations' => $destinations,
+            'packages'     => $packages,
+            'heroUrl'      => $this->heroUrl(),
+            'dashboard'    => $this->dashboardUrl(),
         ]);
     }
 
@@ -79,5 +100,32 @@ class HomeController extends Controller
             ->get();
 
         return view('user.home', compact('stats', 'upcoming', 'latestBookings'));
+    }
+
+    /**
+     * Foto latar hero. Memakai salinan berukuran web bila sudah
+     * dipublikasikan, dan kembali ke foto asli bila belum.
+     */
+    private function heroUrl(): string
+    {
+        return Media::exists(DemoGallery::HERO_TARGET)
+            ? (string) Media::url(DemoGallery::HERO_TARGET)
+            : asset('images/Homepantai.jpg');
+    }
+
+    /** Label sisa kuota pada kartu paket. */
+    private function quotaTag(int $quota): string
+    {
+        if ($quota === 0) {
+            return 'Penuh';
+        }
+
+        return $quota <= self::LOW_QUOTA ? "Sisa {$quota} kursi" : 'Pilihan';
+    }
+
+    /** Tautan dashboard sesuai peran pengguna yang sedang masuk. */
+    private function dashboardUrl(): ?string
+    {
+        return auth()->check() ? route(auth()->user()->role->dashboardRoute()) : null;
     }
 }

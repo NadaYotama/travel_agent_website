@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Support\Media;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class PackageImage extends Model
 {
@@ -18,8 +18,8 @@ class PackageImage extends Model
         return $this->belongsTo(TourPackage::class);
     }
 
-    public function getUrlAttribute(): string
+    public function getUrlAttribute(): ?string
     {
-        return Storage::url($this->path);
+        return Media::url($this->path);
     }
 }

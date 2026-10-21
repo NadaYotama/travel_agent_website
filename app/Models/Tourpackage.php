@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
+use App\Support\Media;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
 
 class TourPackage extends Model
 {
@@ -102,6 +102,6 @@ class TourPackage extends Model
     {
         $image = $this->relationLoaded('images') ? $this->images->first() : $this->images()->first();
 
-        return $image ? Storage::url($image->path) : null;
+        return $image ? Media::url($image->path) : null;
     }
 }

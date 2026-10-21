@@ -15,7 +15,7 @@ class TourPackagePolicy
             return true;
         }
 
-        return $user !== null && in_array($user->role, [UserRole::ADMIN, UserRole::AGENT], true);
+        return $user !== null && in_array($user->role, [UserRole::ADMIN, UserRole::TOUR_GUIDE], true);
     }
 
     public function manage(User $user): bool

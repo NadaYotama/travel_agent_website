@@ -44,7 +44,7 @@
                             <img src="{{ asset('backend/matrix-admin-master/assets/images/logo-icon.png') }}" alt="homepage" class="light-logo" />
                         </b>
                         <span class="logo-text">
-                            <img src="{{ asset('backend/matrix-admin-master/assets/images/logo-text.png') }}" alt="homepage" class="light-logo" />
+                            <span class="text-white font-weight-bold">Dashboard Admin</span>
                         </span>
                     </a>
                     <!-- Mobile toggle -->
@@ -235,6 +235,18 @@
             </footer>
         </div>
     </div>
+
+    @push('scripts')
+<script>
+    history.pushState(null, '', location.href);
+    window.addEventListener('popstate', function () {
+        history.pushState(null, '', location.href);
+    });
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) location.reload();
+    });
+</script>
+@endpush
 
     <!-- Required js -->
     <script src="{{ asset('backend/matrix-admin-master/assets/libs/jquery/dist/jquery.min.js') }}"></script>

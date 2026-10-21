@@ -11,7 +11,7 @@ class BookingPolicy
 {
     private function isStaff(User $user): bool
     {
-        return in_array($user->role, [UserRole::ADMIN, UserRole::AGENT], true);
+        return in_array($user->role, [UserRole::ADMIN, UserRole::TOUR_GUIDE], true);
     }
 
     private function isOwner(User $user, Booking $booking): bool

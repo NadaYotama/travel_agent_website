@@ -36,21 +36,21 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::prefix('admin')
                 ->name('admin.')
-                ->middleware(['web', 'auth', 'role:admin'])
+                ->middleware(['web', 'auth', 'cache.headers:no_store;private', 'role:admin'])
                 ->group(base_path('routes/admin.php'));
 
-            Route::prefix('agent')
-                ->name('agent.')
-                ->middleware(['web', 'auth', 'role:admin,agent'])
-                ->group(base_path('routes/agent.php'));
+            Route::prefix('tourguide')
+                ->name('tourguide.')
+                ->middleware(['web', 'auth', 'cache.headers:no_store;private', 'role:tourguide'])
+                ->group(base_path('routes/tourguide.php'));
 
-            Route::prefix('vendor')
-                ->name('vendor.')
-                ->middleware(['web', 'auth', 'role:vendor'])
-                ->group(base_path('routes/vendor.php'));
+            Route::prefix('manager')
+                ->name('manager.')
+                ->middleware(['web', 'auth', 'cache.headers:no_store;private', 'role:manager'])
+                ->group(base_path('routes/manager.php'));
 
             Route::name('user.')
-                ->middleware(['web', 'auth', 'role:user'])
+                ->middleware(['web', 'auth', 'cache.headers:no_store;private', 'role:user'])
                 ->group(base_path('routes/user.php'));
         });
     }

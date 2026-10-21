@@ -17,7 +17,9 @@ class DatabaseSeeder extends Seeder
         $seeders = [UserSeeder::class];
 
         if (! app()->isProduction()) {
-            // Urutan penting: paket membutuhkan destinasi dan layanan vendor.
+            // Urutan penting: foto contoh dulu, lalu destinasi, terakhir paket
+            // (paket membutuhkan destinasi dan layanan vendor).
+            $seeders[] = DemoImageSeeder::class;
             $seeders[] = DestinationSeeder::class;
             $seeders[] = TourPackageSeeder::class;
         }

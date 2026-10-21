@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Foto belum tersedia">
+  <defs>
+    <linearGradient id="nusa-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#137b8b"/>
+      <stop offset="1" stop-color="#0d2b3a"/>
+    </linearGradient>
+    <linearGradient id="nusa-haze" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#0d2b3a" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#0d2b3a" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="600" fill="url(#nusa-bg)"/>
+
+  <circle cx="604" cy="164" r="58" fill="#f4b63f" fill-opacity="0.9"/>
+
+  <path d="M0 432 L196 272 L328 398 L432 304 L604 474 L800 336 L800 600 L0 600 Z" fill="#ffffff" fill-opacity="0.10"/>
+  <path d="M0 502 L152 404 L292 498 L424 416 L612 542 L800 456 L800 600 L0 600 Z" fill="#0d2b3a" fill-opacity="0.45"/>
+
+  <rect width="800" height="600" fill="url(#nusa-haze)"/>
+
+  <g transform="translate(400 300)" fill="none" stroke="#ffffff" stroke-opacity="0.85" stroke-width="10"
+     stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-92" y="-70" width="184" height="140" rx="20"/>
+    <path d="M-92 34 L-40 -18 L4 26 L44 -14 L92 34"/>
+    <circle cx="34" cy="-32" r="11"/>
+  </g>
+</svg>

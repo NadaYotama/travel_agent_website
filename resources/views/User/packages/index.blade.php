@@ -78,15 +78,9 @@
                 <article class="flex flex-col bg-white rounded-3xl overflow-hidden shadow-card border border-slate-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                     {{-- Cover Image --}}
                     <div class="relative h-56 bg-slate-100 overflow-hidden">
-                        @if($pkg->images->first())
-                            <img src="{{ Storage::url($pkg->images->first()->path) }}" alt="{{ $pkg->title }}" 
-                                 class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                                 onerror="this.onerror=null; this.src='{{ asset('images/Balii.jpg') }}';">
-                        @else
-                            <img src="{{ asset('images/Balii.jpg') }}" alt="{{ $pkg->title }}" 
-                                 class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                                 onerror="this.remove()">
-                        @endif
+                        <img src="{{ $pkg->cover_url ?? asset('images/placeholder.svg') }}" alt="{{ $pkg->title }}"
+                             class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                             onerror="this.onerror=null; this.src='{{ asset('images/placeholder.svg') }}';">
 
                         {{-- Destinasi Badge --}}
                         <div class="absolute top-4 left-4 flex flex-wrap gap-2">
@@ -168,4 +162,3 @@
     @endif
 </div>
 @endsection
-

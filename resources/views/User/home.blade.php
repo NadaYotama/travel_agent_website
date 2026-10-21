@@ -88,11 +88,22 @@
             @if(isset($latestBookings) && $latestBookings->count() > 0)
                 <div class="space-y-3">
                     @foreach($latestBookings as $b)
+                        @php
+                            $status = $b->status->value;
+                            $statusClass = match ($status) {
+                                'confirmed' => 'bg-emerald-100 text-emerald-700',
+                                'paid' => 'bg-sky-100 text-sky-700',
+                                'pending' => 'bg-amber-100 text-amber-700',
+                                'completed' => 'bg-indigo-100 text-indigo-700',
+                                'cancelled' => 'bg-rose-100 text-rose-700',
+                                default => 'bg-slate-100 text-slate-700',
+                            };
+                        @endphp
                         <div class="p-3 rounded-lg border border-slate-100 text-sm">
                             <p class="font-semibold text-slate-800 truncate">{{ $b->tourPackage->title ?? 'Pesanan' }}</p>
                             <div class="flex items-center justify-between text-xs text-slate-500 mt-1">
                                 <span>{{ $b->created_at->format('d/m/Y') }}</span>
-                                <span class="capitalize font-medium">{{ $b->status }}</span>
+                                <span class="inline-flex rounded-full px-2.5 py-1 font-semibold {{ $statusClass }}">{{ ucfirst($status) }}</span>
                             </div>
                         </div>
                     @endforeach

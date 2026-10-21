@@ -51,7 +51,7 @@ class BookingController extends Controller
         return view('admin.bookings.show', [
             'booking' => $booking,
             'statuses' => BookingStatus::cases(),
-            'agents'   => User::whereIn('role', [UserRole::AGENT->value, UserRole::ADMIN->value])
+            'tourGuides' => User::whereIn('role', [UserRole::TOUR_GUIDE->value, UserRole::ADMIN->value])
                 ->orderBy('name')->get(['id', 'name']),
         ]);
     }
@@ -62,7 +62,7 @@ class BookingController extends Controller
             'status'   => ['required', Rule::enum(BookingStatus::class)],
             'agent_id' => [
                 'nullable',
-                Rule::exists('users', 'id')->whereIn('role', [UserRole::AGENT->value, UserRole::ADMIN->value]),
+                Rule::exists('users', 'id')->whereIn('role', [UserRole::TOUR_GUIDE->value, UserRole::ADMIN->value]),
             ],
             'notes'    => ['nullable', 'string', 'max:1000'],
         ]);

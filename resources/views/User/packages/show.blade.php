@@ -45,23 +45,18 @@
             {{-- Galeri Foto --}}
             <div class="bg-white rounded-3xl overflow-hidden shadow-card border border-slate-100 p-2">
                 <div class="relative h-80 sm:h-96 w-full rounded-2xl overflow-hidden bg-slate-100">
-                    @if($package->images->first())
-                        <img src="{{ Storage::url($package->images->first()->path) }}" alt="{{ $package->title }}"
-                             id="main-preview" class="w-full h-full object-cover"
-                             onerror="this.onerror=null; this.src='{{ asset('images/Balii.jpg') }}';">
-                    @else
-                        <img src="{{ asset('images/Balii.jpg') }}" alt="{{ $package->title }}"
-                             id="main-preview" class="w-full h-full object-cover">
-                    @endif
+                    <img src="{{ $package->cover_url ?? asset('images/placeholder.svg') }}" alt="{{ $package->title }}"
+                         id="main-preview" class="w-full h-full object-cover"
+                         onerror="this.onerror=null; this.src='{{ asset('images/placeholder.svg') }}';">
                 </div>
 
                 @if($package->images->count() > 1)
                     <div class="flex gap-2 overflow-x-auto p-2 mt-2">
                         @foreach($package->images as $img)
-                            <button type="button" 
-                                    onclick="document.getElementById('main-preview').src = '{{ Storage::url($img->path) }}'"
+                            <button type="button"
+                                    onclick="document.getElementById('main-preview').src = '{{ $img->url }}'"
                                     class="w-20 h-16 rounded-xl overflow-hidden border-2 border-transparent hover:border-[var(--lagoon)] flex-shrink-0 transition">
-                                <img src="{{ Storage::url($img->path) }}" class="w-full h-full object-cover" alt="Thumbnail">
+                                <img src="{{ $img->url }}" class="w-full h-full object-cover" alt="Thumbnail">
                             </button>
                         @endforeach
                     </div>
@@ -220,11 +215,7 @@
                             @foreach($related as $rel)
                                 <a href="{{ route('user.packages.show', $rel->slug) }}" class="flex gap-3 group items-center">
                                     <div class="w-16 h-16 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
-                                        @if($rel->images->first())
-                                            <img src="{{ Storage::url($rel->images->first()->path) }}" class="w-full h-full object-cover group-hover:scale-110 transition" onerror="this.onerror=null; this.src='{{ asset('images/Balii.jpg') }}';">
-                                        @else
-                                            <img src="{{ asset('images/Balii.jpg') }}" class="w-full h-full object-cover group-hover:scale-110 transition">
-                                        @endif
+                                        <img src="{{ $rel->cover_url ?? asset('images/placeholder.svg') }}" class="w-full h-full object-cover group-hover:scale-110 transition" onerror="this.onerror=null; this.src='{{ asset('images/placeholder.svg') }}';">
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <h4 class="text-sm font-bold text-slate-800 truncate group-hover:text-[var(--lagoon)] transition">
@@ -244,4 +235,3 @@
     </div>
 </div>
 @endsection
-

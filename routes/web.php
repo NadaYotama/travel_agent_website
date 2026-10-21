@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 | Route publik & route lintas-role
 |--------------------------------------------------------------------------
 | File ini dimuat oleh RouteServiceProvider tanpa middleware role.
-| Route per role ada di admin.php, agent.php, vendor.php, dan user.php.
+| Route per role ada di admin.php, tourguide.php, manager.php, dan user.php.
 */
 
 // Halaman utama (welcome.blade.php)
@@ -20,11 +20,11 @@ Route::get('/paket/{package:slug}', [User\PackageController::class, 'show'])->na
 
 // Tujuan redirect setelah login (Breeze memakai /dashboard): arahkan sesuai role.
 Route::get('/dashboard', fn () => redirect()->route(auth()->user()->role->dashboardRoute()))
-    ->middleware('auth')
+    ->middleware(['auth', 'cache.headers:no_store;private'])
     ->name('dashboard');
 
 // Profil akun: tersedia untuk semua role yang sudah login.
-Route::middleware('auth')->prefix('profile')->name('profile.')->group(function () {
+Route::middleware(['auth', 'cache.headers:no_store;private'])->prefix('profile')->name('profile.')->group(function () {
     Route::get('/', [User\ProfileController::class, 'edit'])->name('edit');
     Route::patch('/', [User\ProfileController::class, 'update'])->name('update');
     Route::put('/password', [User\ProfileController::class, 'updatePassword'])->name('password');

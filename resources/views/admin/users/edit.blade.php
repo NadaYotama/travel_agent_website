@@ -87,7 +87,7 @@
                             <select name="role" id="role" class="form-control @error('role') is-invalid @enderror" {{ $user->id === auth()->id() ? 'disabled' : '' }} required>
                                 @foreach($roles as $r)
                                     <option value="{{ $r->value }}" {{ old('role', $currentRole) === $r->value ? 'selected' : '' }}>
-                                        {{ ucfirst($r->value) }}
+                                        {{ $r->label() }}
                                     </option>
                                 @endforeach
                             </select>
@@ -148,4 +148,3 @@
     </div>
 </div>
 @endsection
-

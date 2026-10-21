@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Destination;
+use App\Support\DemoGallery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -11,9 +12,11 @@ class DestinationSeeder extends Seeder
     public function run(): void
     {
         foreach ($this->destinations() as $d) {
+            $slug = Str::slug($d['name']);
+
             // Dicocokkan lewat slug, sehingga seeder aman dijalankan ulang.
-            Destination::firstOrCreate(
-                ['slug' => Str::slug($d['name'])],
+            $destination = Destination::firstOrCreate(
+                ['slug' => $slug],
                 [
                     'name'        => $d['name'],
                     'country'     => $d['country'],
@@ -21,7 +24,24 @@ class DestinationSeeder extends Seeder
                     'description' => $d['description'],
                 ]
             );
+
+            $this->attachThumbnail($destination, $slug);
         }
+    }
+
+    /**
+     * Pasang foto contoh bila destinasi belum punya thumbnail sendiri,
+     * supaya unggahan asli dari admin tidak pernah tertimpa.
+     */
+    private function attachThumbnail(Destination $destination, string $slug): void
+    {
+        $path = DemoGallery::destinationPath($slug);
+
+        if ($path === null || $destination->thumbnail !== null) {
+            return;
+        }
+
+        $destination->update(['thumbnail' => $path]);
     }
 
     private function destinations(): array

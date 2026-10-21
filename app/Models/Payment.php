@@ -3,10 +3,10 @@
 namespace App\Models;
 
 use App\Enums\PaymentStatus;
+use App\Support\Media;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class Payment extends Model
 {
@@ -20,6 +20,7 @@ class Payment extends Model
         'proof',
         'paid_at',
         'gateway_ref',
+        'snap_token',
     ];
 
     protected $casts = [
@@ -35,6 +36,6 @@ class Payment extends Model
 
     public function getProofUrlAttribute(): ?string
     {
-        return $this->proof ? Storage::url($this->proof) : null;
+        return Media::url($this->proof);
     }
 }

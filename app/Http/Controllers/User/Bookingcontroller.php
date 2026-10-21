@@ -35,17 +35,21 @@ class BookingController extends Controller
     {
         $this->authorize('view', $package);
 
-        if ($package->quota < 1 || $package->start_date->isPast()) {
+        if ($package->quota < 1 || ! $package->start_date || $package->start_date->isPast()) {
             return redirect()->route('user.packages.show', $package->slug)
                 ->with('error', 'Paket ini tidak dapat dipesan.');
         }
 
-        return view('user.bookings.create', compact('package'));
+        return view('User.bookings.create', compact('package'));
     }
 
     public function store(Request $request, TourPackage $package, CreateBookingAction $action): RedirectResponse
     {
         $this->authorize('view', $package);
+
+        if (! $package->is_bookable) {
+            return back()->withInput()->withErrors(['booking' => 'Paket ini sudah tidak dapat dipesan.']);
+        }
 
         $data = $request->validate([
             'participants'             => ['required', 'array', 'min:1', 'max:20'],
@@ -55,6 +59,7 @@ class BookingController extends Controller
             'promo_code'               => ['nullable', 'string', 'max:30'],
             'notes'                    => ['nullable', 'string', 'max:1000'],
         ]);
+        $data['total_participants'] = count($data['participants']);
 
         try {
             $booking = $action->execute($request->user(), $package, $data);
@@ -72,7 +77,7 @@ class BookingController extends Controller
 
         $booking->load(['tourPackage.destination', 'participants', 'payments', 'promo']);
 
-        return view('user.bookings.show', compact('booking'));
+        return view('User.bookings.show', compact('booking'));
     }
 
     public function cancel(Request $request, Booking $booking, CancelBookingAction $action): RedirectResponse

@@ -11,7 +11,7 @@
                 <div class="d-flex no-block align-items-center m-b-20">
                     <div>
                         <h4 class="card-title mb-0">Daftar Transaksi Pembayaran</h4>
-                        <p class="text-muted font-13 mb-0">Verifikasi bukti transfer dari customer untuk mengonfirmasi pesanan wisata.</p>
+                        <p class="text-muted font-13 mb-0">Status pembayaran Midtrans diperbarui otomatis melalui notifikasi resmi gateway.</p>
                     </div>
                 </div>
 
@@ -77,7 +77,7 @@
                                         @endif
                                     </td>
                                     <td class="text-center align-middle">
-                                        @if($pStatus === 'pending' && Route::has('admin.payments.verify'))
+                                        @if($pStatus === 'pending' && $p->method !== 'midtrans_snap' && Route::has('admin.payments.verify'))
                                             <div class="btn-group" role="group">
                                                 <form action="{{ route('admin.payments.verify', $p) }}" method="POST" class="d-inline" onsubmit="return confirm('Setujui pembayaran ini?');">
                                                     @csrf
@@ -129,4 +129,3 @@
     </div>
 </div>
 @endsection
-

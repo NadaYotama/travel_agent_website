@@ -39,7 +39,9 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            // URL sengaja relatif (bukan APP_URL) supaya tetap benar
+            // saat aplikasi dijalankan di host atau port berbeda.
+            'url' => '/storage',
             'visibility' => 'public',
             'throw' => false,
         ],

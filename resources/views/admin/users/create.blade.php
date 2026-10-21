@@ -13,7 +13,7 @@
                     <div class="d-flex no-block align-items-center m-b-20 border-bottom p-b-15">
                         <div>
                             <h4 class="card-title mb-0">Form Pembuatan Akun Baru</h4>
-                            <small class="text-muted">Tambahkan akun baru dengan memilih peran (Admin, Agen, Vendor, Customer).</small>
+                            <small class="text-muted">Tambahkan akun dengan peran Admin, Manager, Tour Guide, atau User/Customer.</small>
                         </div>
                         <div class="ml-auto">
                             <a href="{{ route('admin.users.index') }}" class="btn btn-secondary btn-sm waves-effect">
@@ -84,7 +84,7 @@
                                 <option value="">-- Pilih Peran --</option>
                                 @foreach($roles as $r)
                                     <option value="{{ $r->value }}" {{ old('role') === $r->value ? 'selected' : '' }}>
-                                        {{ ucfirst($r->value) }}
+                                        {{ $r->label() }}
                                     </option>
                                 @endforeach
                             </select>
@@ -141,4 +141,3 @@
     </div>
 </div>
 @endsection
-

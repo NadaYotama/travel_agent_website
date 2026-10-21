@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'Nusa Jelajah') }} - Paket Wisata & Perjalanan</title>
+    <title>{{ config('app.name', 'Terra Travel') }} - Paket Wisata & Perjalanan</title>
     <meta name="description" content="Pesan paket wisata domestik dan internasional dengan itinerary jelas, harga transparan, dan pendamping perjalanan berpengalaman.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,26 +30,8 @@
 </head>
 <body class="antialiased" x-data="{ open: false }">
 
-<!-- @php
-    $dashboard = auth()->check() ? route(auth()->user()->role->dashboardRoute()) : null;
-    $isAdmin = auth()->check() && ((auth()->user()->role->value ?? auth()->user()->role) === 'admin');
-
-    // Data dari database dikirim via HomeController@welcome.
-    // Jika database belum diisi oleh Admin, fallback memakai contoh visual berikut:
-    $destinations = $destinations ?? [
-        ['name' => 'Bali',           'region' => 'Indonesia', 'img' => 'Balii.jpg',       'count' => 24],
-        ['name' => 'Labuan Bajo',    'region' => 'Indonesia', 'img' => 'Homepantai.jpg',  'count' => 11],
-        ['name' => 'Yogyakarta',     'region' => 'Indonesia', 'img' => 'Balii.jpg',       'count' => 15],
-        ['name' => 'Kyoto',          'region' => 'Jepang',    'img' => 'kyoto.jpg',       'count' => 8],
-        ['name' => 'Cappadocia',     'region' => 'Turki',     'img' => 'Balii.jpg',       'count' => 6],
-    ];
-
-    $packages = $packages ?? [
-        ['title' => 'Bali Timur 4 Hari 3 Malam',      'days' => 4, 'price' => 3450000, 'quota' => 12, 'img' => 'Balii.jpg',      'tag' => 'Terlaris'],
-        ['title' => 'Open Trip Labuan Bajo 3D2N',      'days' => 3, 'price' => 2890000, 'quota' => 6,  'img' => 'Homepantai.jpg', 'tag' => 'Sisa 6 kursi'],
-        ['title' => 'Kyoto & Osaka 6 Hari',            'days' => 6, 'price' => 17900000,'quota' => 20, 'img' => 'Balii.jpg',      'tag' => 'Pilihan'],
-    ];
-@endphp -->
+{{-- Data halaman ini disiapkan oleh HomeController@welcome:
+     $destinations, $packages, $heroUrl, dan $dashboard. --}}
 
 {{-- ========== NAVBAR ========== --}}
 <header class="absolute inset-x-0 top-0 z-30">
@@ -108,7 +90,7 @@
 <main>
 {{-- ========== HERO ========== --}}
 <section class="photo relative min-h-[640px] text-white">
-    <img src="{{ asset('images/Homepantai.jpg') }}" alt="" onerror="this.remove()">
+    <img src="{{ $heroUrl }}" alt="" onerror="this.remove()">
     <div class="absolute inset-0 bg-gradient-to-t from-[#0d2b3a] via-[#0d2b3a]/55 to-[#0d2b3a]/20"></div>
 
     <div class="relative mx-auto flex min-h-[640px] max-w-7xl flex-col justify-end px-5 pb-28 pt-40 sm:px-8">
@@ -157,8 +139,9 @@
         <p class="max-w-sm text-slate-600">Dari pulau-pulau di Indonesia sampai kota-kota di Asia dan Eropa.</p>
     </div>
 
-    <div class="mt-12 grid auto-rows-[200px] gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:auto-rows-[240px]">
-        @foreach ($destinations as $i => $d)
+    @if (count($destinations))
+        <div class="mt-12 grid auto-rows-[200px] gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:auto-rows-[240px]">
+            @foreach ($destinations as $i => $d)
             @php
                 $layout = match ($i) {
                     0 => 'lg:col-span-2 lg:row-span-2',
@@ -168,16 +151,22 @@
             @endphp
             <a href="{{ Route::has('user.packages.index') ? route('user.packages.index', ['q' => $d['name']]) : '#paket' }}"
                class="photo group rounded-3xl {{ $layout }}">
-                <img src="{{ $d['img_url'] ?? asset('images/destinations/'.($d['img'] ?? '')) }}" alt="Pemandangan {{ $d['name'] }}" loading="lazy"
-                     class="transition-transform duration-500 group-hover:scale-105" onerror="this.remove()">
+                <img src="{{ $d['img_url'] ?? asset('images/placeholder.svg') }}" alt="Pemandangan {{ $d['name'] }}" loading="lazy"
+                     class="transition-transform duration-500 group-hover:scale-105"
+                     onerror="this.onerror=null; this.src='{{ asset('images/placeholder.svg') }}';">
                 <div class="absolute inset-0 bg-gradient-to-t from-[#0d2b3a]/80 via-transparent to-transparent"></div>
                 <div class="absolute bottom-0 left-0 p-5 text-white">
                     <p class="font-display text-2xl font-bold">{{ $d['name'] }}</p>
                     <p class="text-sm text-white/80">{{ $d['region'] }}, {{ $d['count'] }} paket</p>
                 </div>
             </a>
-        @endforeach
-    </div>
+            @endforeach
+        </div>
+    @else
+        <p class="mt-12 rounded-3xl bg-[var(--foam)] p-8 text-center text-slate-600">
+            Belum ada destinasi yang dipublikasikan.
+        </p>
+    @endif
 </section>
 
 {{-- ========== PAKET ========== --}}
@@ -189,11 +178,13 @@
                class="text-sm font-semibold text-[var(--lagoon)] underline underline-offset-4">Lihat semua paket</a>
         </div>
 
-        <div class="mt-12 grid gap-6 md:grid-cols-3">
-            @foreach ($packages as $p)
+        @if (count($packages))
+            <div class="mt-12 grid gap-6 md:grid-cols-3">
+                @foreach ($packages as $p)
                 <article class="flex flex-col overflow-hidden rounded-3xl bg-white">
                     <div class="photo h-56">
-                        <img src="{{ $p['img_url'] ?? asset('images/packages/'.($p['img'] ?? '')) }}" alt="{{ $p['title'] }}" loading="lazy" onerror="this.remove()">
+                        <img src="{{ $p['img_url'] ?? asset('images/placeholder.svg') }}" alt="{{ $p['title'] }}" loading="lazy"
+                             onerror="this.onerror=null; this.src='{{ asset('images/placeholder.svg') }}';">
                         @if ($p['tag'])
                             <span class="absolute left-4 top-4 rounded-full bg-[var(--sun)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">{{ $p['tag'] }}</span>
                         @endif
@@ -212,8 +203,13 @@
                         </div>
                     </div>
                 </article>
-            @endforeach
-        </div>
+                @endforeach
+            </div>
+        @else
+            <p class="mt-12 rounded-3xl bg-white p-8 text-center text-slate-600">
+                Belum ada paket wisata yang dipublikasikan.
+            </p>
+        @endif
     </div>
 </section>
 

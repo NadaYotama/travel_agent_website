@@ -16,6 +16,10 @@ class CreateBookingAction
         return DB::transaction(function () use ($user, $package, $data) {
             $package = TourPackage::lockForUpdate()->findOrFail($package->id);
 
+            if (! $package->is_bookable) {
+                throw new \DomainException('Paket ini sudah tidak dapat dipesan.');
+            }
+
             if ($package->quota < $data['total_participants']) {
                 throw new \DomainException('Kuota paket tidak mencukupi.');
             }

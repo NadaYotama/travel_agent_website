@@ -20,7 +20,7 @@ class UpdateBookingRequest extends FormRequest
             'status'   => ['required', Rule::enum(BookingStatus::class)],
             'agent_id' => [
                 'nullable',
-                Rule::exists('users', 'id')->whereIn('role', [UserRole::AGENT->value, UserRole::ADMIN->value]),
+                Rule::exists('users', 'id')->whereIn('role', [UserRole::TOUR_GUIDE->value, UserRole::ADMIN->value]),
             ],
             'notes'    => ['nullable', 'string', 'max:1000'],
         ];
@@ -30,7 +30,7 @@ class UpdateBookingRequest extends FormRequest
     {
         return [
             'status'   => 'status booking',
-            'agent_id' => 'agent',
+            'agent_id' => 'tour guide',
             'notes'    => 'catatan',
         ];
     }
