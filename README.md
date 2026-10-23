@@ -29,9 +29,9 @@ npm run build
 php artisan serve
 ```
 
-`php artisan storage:link` **wajib** dijalankan. Tanpa symlink tersebut semua
-foto yang tersimpan di disk `public` akan mengembalikan 404, sehingga halaman
-tampil tanpa gambar.
+`php artisan storage:link` **wajib** dijalankan. Gambar contoh halaman utama
+sudah disimpan dan dilacak di Git pada `storage/app/public`, sehingga setelah
+clone perintah ini membuatnya dapat diakses lewat `/storage/...`.
 
 ## Cara foto ditangani
 
@@ -44,25 +44,17 @@ disimpan pada disk `public` → `storage/app/public`, dan dibaca browser lewat
   benar walau dijalankan di port atau domain berbeda.
 - Path tersimpan di database (`destinations.thumbnail`, `package_images.path`)
   diubah menjadi URL lewat `App\Support\Media::url()`.
-- Jika sebuah destinasi atau paket belum punya foto, view memakai
-  `public/images/placeholder.svg`, bukan URL kosong.
+- Gambar contoh hero, destinasi, dan paket tersedia di
+  `storage/app/public/hero.jpg`, `destinations/`, dan `packages/`.
+- Seeder menghubungkan gambar contoh ke destinasi dan paket; jalankan
+  `php artisan migrate:fresh --seed` untuk mengisi data demo pada database baru.
 
 ### Foto contoh
 
-Foto asli beresolusi besar ada di `public/images`. Karena ukurannya mencapai
-12 MB, foto tersebut tidak dipakai langsung oleh halaman web. Seeder
-menyalinnya ke disk `public` dalam ukuran web (lebar maksimum 1600 px untuk
-kartu, 1920 px untuk hero) sehingga totalnya turun menjadi sekitar 3 MB:
-
-```bash
-php artisan demo:images          # lewati berkas yang sudah ada
-php artisan demo:images --force  # timpa semua foto contoh
-```
-
-Daftar sumber, nama berkas tujuan, dan lebar maksimumnya ada di
-`app/Support/DemoGallery.php`. Seeder `DestinationSeeder` dan
-`TourPackageSeeder` memakai daftar yang sama untuk mengisi kolom gambar,
-dan keduanya tidak menimpa foto yang sudah diunggah admin.
+Foto contoh dalam ukuran web disimpan langsung di Git pada
+`storage/app/public`; tidak perlu mengunggah atau menyalin foto secara manual.
+Pastikan menjalankan `php artisan storage:link` agar browser dapat membacanya.
+Daftar nama berkas yang digunakan seeder ada di `app/Support/DemoGallery.php`.
 
 ## Akun hasil seeder
 

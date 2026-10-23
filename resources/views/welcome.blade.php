@@ -151,9 +151,10 @@
             @endphp
             <a href="{{ Route::has('user.packages.index') ? route('user.packages.index', ['q' => $d['name']]) : '#paket' }}"
                class="photo group rounded-3xl {{ $layout }}">
-                <img src="{{ $d['img_url'] ?? asset('images/placeholder.svg') }}" alt="Pemandangan {{ $d['name'] }}" loading="lazy"
-                     class="transition-transform duration-500 group-hover:scale-105"
-                     onerror="this.onerror=null; this.src='{{ asset('images/placeholder.svg') }}';">
+                @if ($d['img_url'])
+                    <img src="{{ $d['img_url'] }}" alt="Pemandangan {{ $d['name'] }}" loading="lazy"
+                         class="transition-transform duration-500 group-hover:scale-105">
+                @endif
                 <div class="absolute inset-0 bg-gradient-to-t from-[#0d2b3a]/80 via-transparent to-transparent"></div>
                 <div class="absolute bottom-0 left-0 p-5 text-white">
                     <p class="font-display text-2xl font-bold">{{ $d['name'] }}</p>
@@ -183,8 +184,9 @@
                 @foreach ($packages as $p)
                 <article class="flex flex-col overflow-hidden rounded-3xl bg-white">
                     <div class="photo h-56">
-                        <img src="{{ $p['img_url'] ?? asset('images/placeholder.svg') }}" alt="{{ $p['title'] }}" loading="lazy"
-                             onerror="this.onerror=null; this.src='{{ asset('images/placeholder.svg') }}';">
+                        @if ($p['img_url'])
+                            <img src="{{ $p['img_url'] }}" alt="{{ $p['title'] }}" loading="lazy">
+                        @endif
                         @if ($p['tag'])
                             <span class="absolute left-4 top-4 rounded-full bg-[var(--sun)] px-3 py-1 text-xs font-semibold text-[var(--ink)]">{{ $p['tag'] }}</span>
                         @endif

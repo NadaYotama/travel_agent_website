@@ -42,4 +42,3 @@ class DemoGallery
         return $map[$slug] ?? null;
     }
 }
-

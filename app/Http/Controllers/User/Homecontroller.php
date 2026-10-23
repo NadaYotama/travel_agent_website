@@ -25,8 +25,7 @@ class HomeController extends Controller
     /**
      * Halaman publik (welcome.blade.php).
      *
-     * Setiap kartu selalu membawa kunci "img_url". Nilainya null bila
-     * destinasi/paket belum punya foto, dan view memakai gambar placeholder.
+     * Foto contoh diambil dari disk public agar bisa diakses melalui storage:link.
      */
     public function welcome(): View
     {
@@ -36,15 +35,23 @@ class HomeController extends Controller
             ->latest()
             ->limit(self::DESTINATION_CARDS)
             ->get()
-            ->map(fn (Destination $destination) => [
-                'id'      => $destination->id,
-                'name'    => $destination->name,
-                'region'  => $destination->city
-                    ? "{$destination->city}, {$destination->country}"
-                    : $destination->country,
-                'img_url' => $destination->thumbnail_url,
-                'count'   => $destination->published_count,
-            ])
+            ->map(function (Destination $destination) {
+                $imagePath = $destination->thumbnail;
+
+                if (! Media::exists($imagePath)) {
+                    $imagePath = DemoGallery::destinationPath($destination->slug);
+                }
+
+                return [
+                    'id'      => $destination->id,
+                    'name'    => $destination->name,
+                    'region'  => $destination->city
+                        ? "{$destination->city}, {$destination->country}"
+                        : $destination->country,
+                    'img_url' => Media::url($imagePath),
+                    'count'   => $destination->published_count,
+                ];
+            })
             ->all();
 
         $packages = TourPackage::query()
@@ -53,16 +60,24 @@ class HomeController extends Controller
             ->latest()
             ->limit(self::PACKAGE_CARDS)
             ->get()
-            ->map(fn (TourPackage $package) => [
-                'id'      => $package->id,
-                'title'   => $package->title,
-                'days'    => $package->duration_days,
-                'price'   => $package->price,
-                'quota'   => $package->quota,
-                'img_url' => $package->cover_url,
-                'tag'     => $this->quotaTag($package->quota),
-                'url'     => route('user.packages.show', $package->slug),
-            ])
+            ->map(function (TourPackage $package) {
+                $imagePath = $package->images->first()?->path;
+
+                if (! Media::exists($imagePath)) {
+                    $imagePath = DemoGallery::packagePath($package->slug);
+                }
+
+                return [
+                    'id'      => $package->id,
+                    'title'   => $package->title,
+                    'days'    => $package->duration_days,
+                    'price'   => $package->price,
+                    'quota'   => $package->quota,
+                    'img_url' => Media::url($imagePath),
+                    'tag'     => $this->quotaTag($package->quota),
+                    'url'     => route('user.packages.show', $package->slug),
+                ];
+            })
             ->all();
 
         return view('welcome', [
@@ -108,9 +123,7 @@ class HomeController extends Controller
      */
     private function heroUrl(): string
     {
-        return Media::exists(DemoGallery::HERO_TARGET)
-            ? (string) Media::url(DemoGallery::HERO_TARGET)
-            : asset('images/Homepantai.jpg');
+        return (string) Media::url(DemoGallery::HERO_TARGET);
     }
 
     /** Label sisa kuota pada kartu paket. */
