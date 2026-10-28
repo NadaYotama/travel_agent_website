@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\Booking\CancelBookingAction;
 use App\Enums\BookingStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
-use App\Models\TourPackage;
 use App\Models\User;
+use DomainException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -56,7 +57,7 @@ class BookingController extends Controller
         ]);
     }
 
-    public function update(Request $request, Booking $booking): RedirectResponse
+    public function update(Request $request, Booking $booking, CancelBookingAction $cancelBooking): RedirectResponse
     {
         $data = $request->validate([
             'status'   => ['required', Rule::enum(BookingStatus::class)],
@@ -75,21 +76,28 @@ class BookingController extends Controller
             return back()->with('error', "Booking berstatus {$old->value} tidak dapat diubah lagi.");
         }
 
-        DB::transaction(function () use ($booking, $data, $old, $new) {
-            $booking->update([
-                'status'   => $new->value,
-                'agent_id' => $data['agent_id'] ?? null,
-                'notes'    => $data['notes'] ?? $booking->notes,
-            ]);
+        try {
+            DB::transaction(function () use ($booking, $data, $old, $new, $cancelBooking) {
+                if ($new === BookingStatus::CANCELLED && $old !== BookingStatus::CANCELLED) {
+                    $cancelBooking->execute($booking, 'Dibatalkan oleh admin');
+                }
 
-            // Pembatalan mengembalikan kuota paket.
-            if ($new === BookingStatus::CANCELLED && $old !== BookingStatus::CANCELLED) {
-                TourPackage::whereKey($booking->tour_package_id)
-                    ->increment('quota', $booking->total_participants);
-            }
-        });
+                $booking->update([
+                    'status'   => $new->value,
+                    'agent_id' => $data['agent_id'] ?? null,
+                    'notes'    => $data['notes'] ?? $booking->notes,
+                ]);
+            });
+        } catch (DomainException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        $hasRefundRequest = $new === BookingStatus::CANCELLED
+            && $booking->payments()->where('refund_status', 'requested')->exists();
 
         return redirect()->route('admin.bookings.show', $booking)
-            ->with('success', 'Booking berhasil diperbarui.');
+            ->with('success', $hasRefundRequest
+                ? 'Booking dibatalkan dan permintaan refund dicatat untuk diproses admin.'
+                : 'Booking berhasil diperbarui.');
     }
 }

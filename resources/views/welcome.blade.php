@@ -322,9 +322,8 @@
         <div>
             <p class="font-display font-bold">Hubungi kami</p>
             <ul class="mt-3 space-y-2 text-sm text-slate-600">
-                <li>info@contoh-travel.id</li>
+                <li>info@Terra-Travel.id</li>
                 <li>+62 812-0000-0000</li>
-                <li>Senin sampai Sabtu, 09.00-17.00 WIB</li>
             </ul>
         </div>
     </div>

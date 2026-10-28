@@ -21,12 +21,19 @@ class Payment extends Model
         'paid_at',
         'gateway_ref',
         'snap_token',
+        'refund_status',
+        'refund_reason',
+        'refund_note',
+        'refund_requested_at',
+        'refund_processed_at',
     ];
 
     protected $casts = [
         'status'  => PaymentStatus::class,
         'amount'  => 'decimal:2',
         'paid_at' => 'datetime',
+        'refund_requested_at' => 'datetime',
+        'refund_processed_at' => 'datetime',
     ];
 
     public function booking(): BelongsTo

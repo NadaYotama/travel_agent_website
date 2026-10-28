@@ -129,6 +129,15 @@
                         </li>
                         @endif
 
+                        @if (Route::has('admin.payments.index'))
+                        <li class="sidebar-item {{ request()->routeIs('admin.payments.*') ? 'selected' : '' }}">
+                            <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('admin.payments.index') }}" aria-expanded="false">
+                                <i class="mdi mdi-credit-card"></i>
+                                <span class="hide-menu">Pembayaran & Refund</span>
+                            </a>
+                        </li>
+                        @endif
+
                         @if (Route::has('admin.destinations.index'))
                         <li class="sidebar-item {{ request()->routeIs('admin.destinations.*') ? 'selected' : '' }}">
                             <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('admin.destinations.index') }}" aria-expanded="false">

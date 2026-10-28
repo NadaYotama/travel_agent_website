@@ -8,6 +8,7 @@ use App\Models\Booking;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Transaction;
@@ -109,8 +110,8 @@ class MidtransPaymentService
         ?string $fraudStatus = null
     ): void {
         DB::transaction(function () use ($payment, $transactionStatus, $fraudStatus): void {
+            $booking = Booking::query()->whereKey($payment->booking_id)->lockForUpdate()->firstOrFail();
             $lockedPayment = Payment::query()->whereKey($payment->id)->lockForUpdate()->firstOrFail();
-            $booking = Booking::query()->whereKey($lockedPayment->booking_id)->lockForUpdate()->firstOrFail();
             $isSuccessful = $transactionStatus === 'settlement'
                 || ($transactionStatus === 'capture' && $fraudStatus === 'accept');
 
@@ -125,6 +126,14 @@ class MidtransPaymentService
                 if (in_array($booking->status, [BookingStatus::PENDING, BookingStatus::PAID], true)) {
                     $booking->update(['status' => BookingStatus::CONFIRMED->value]);
                 } elseif ($booking->status === BookingStatus::CANCELLED) {
+                    if ($lockedPayment->refund_status === null) {
+                        $lockedPayment->update([
+                            'refund_status' => 'requested',
+                            'refund_reason' => 'Pembayaran diselesaikan setelah booking dibatalkan',
+                            'refund_requested_at' => now(),
+                        ]);
+                    }
+
                     \Illuminate\Support\Facades\Log::critical(
                         'Midtrans settled a payment for a cancelled booking; manual reconciliation is required.',
                         ['booking_id' => $booking->id, 'payment_id' => $lockedPayment->id]
@@ -188,7 +197,7 @@ class MidtransPaymentService
                 ]);
             }
 
-            $orderId = 'BOOK-' . $lockedBooking->id . '-PAY-' . $payment->id;
+            $orderId = 'PAY-' . $payment->id . '-' . Str::random(12);
             $payment->update(['gateway_ref' => $orderId]);
 
             $this->configureSnap($serverKey, $clientKey);

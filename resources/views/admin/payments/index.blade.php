@@ -27,7 +27,8 @@
                                 <th>Waktu Bayar</th>
                                 <th class="text-center">Bukti Transfer</th>
                                 <th class="text-center">Status</th>
-                                <th class="text-center" style="width: 150px;">Aksi</th>
+                                <th class="text-center">Refund</th>
+                                <th class="text-center" style="min-width: 280px;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -76,9 +77,46 @@
                                             <span class="badge badge-secondary p-2">{{ ucfirst($pStatus) }}</span>
                                         @endif
                                     </td>
-                                    <td class="text-center align-middle">
+                                    <td class="align-middle">
+                                        @if($p->refund_status === \App\Enums\RefundStatus::REQUESTED->value)
+                                            <span class="badge badge-warning text-dark p-2">Menunggu diproses</span>
+                                            <p class="mt-2 mb-1 text-left font-12">{{ $p->refund_reason }}</p>
+                                        @elseif($p->refund_status === \App\Enums\RefundStatus::PROCESSED->value)
+                                            <span class="badge badge-success p-2">Diproses</span>
+                                            <p class="mt-1 mb-0 font-12">{{ $p->refund_note }}</p>
+                                        @elseif($p->refund_status === \App\Enums\RefundStatus::REJECTED->value)
+                                            <span class="badge badge-danger p-2">Ditolak</span>
+                                            <p class="mt-1 mb-0 font-12">{{ $p->refund_note }}</p>
+                                        @else
+                                            <span class="text-muted font-12">-</span>
+                                        @endif
+                                    </td>
+                                    <td class="align-middle">
+                                        @if($p->booking)
+                                            <a href="{{ route('admin.bookings.show', $p->booking) }}" class="btn btn-outline-info btn-sm mb-2">
+                                                <i class="mdi mdi-account-card-details"></i> Detail customer
+                                            </a>
+                                        @endif
+
+                                        @if($p->refund_status === \App\Enums\RefundStatus::REQUESTED->value)
+                                            <form action="{{ route('admin.payments.refund', $p) }}" method="POST" class="mb-2">
+                                                @csrf
+                                                @method('PATCH')
+                                                <label for="refund-note-{{ $p->id }}" class="mb-1 d-block font-12">Catatan untuk customer</label>
+                                                <textarea id="refund-note-{{ $p->id }}" name="refund_note" maxlength="1000" required rows="2" class="form-control form-control-sm mb-2" placeholder="Tulis alasan penolakan atau referensi refund"></textarea>
+                                                <div class="d-flex flex-wrap" style="gap: 4px;">
+                                                    <button type="submit" name="decision" value="processed" class="btn btn-success btn-sm" onclick="return confirm('Pastikan dana refund sudah benar-benar dikembalikan. Status selesai akan terlihat oleh customer.');">
+                                                        Tandai refund selesai
+                                                    </button>
+                                                    <button type="submit" name="decision" value="rejected" class="btn btn-outline-danger btn-sm" onclick="return confirm('Tolak permintaan refund dan kirim catatan ini ke customer?');">
+                                                        Tolak permintaan
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        @endif
+
                                         @if($pStatus === 'pending' && $p->method !== 'midtrans_snap' && Route::has('admin.payments.verify'))
-                                            <div class="btn-group" role="group">
+                                            <div class="btn-group mb-2" role="group">
                                                 <form action="{{ route('admin.payments.verify', $p) }}" method="POST" class="d-inline" onsubmit="return confirm('Setujui pembayaran ini?');">
                                                     @csrf
                                                     @method('PATCH')
@@ -96,14 +134,14 @@
                                                     </button>
                                                 </form>
                                             </div>
-                                        @else
+                                        @elseif($p->refund_status !== \App\Enums\RefundStatus::REQUESTED->value && ! $p->booking)
                                             <span class="text-muted font-12">-</span>
                                         @endif
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="text-center py-5">
+                                    <td colspan="10" class="text-center py-5">
                                         <div class="text-muted">
                                             <i class="mdi mdi-credit-card-off font-48 d-block mb-2 text-warning"></i>
                                             <h5>Belum ada transaksi pembayaran</h5>

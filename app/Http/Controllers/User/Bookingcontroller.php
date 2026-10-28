@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Actions\Booking\CancelBookingAction;
 use App\Actions\Booking\CreateBookingAction;
 use App\Enums\BookingStatus;
+use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\TourPackage;
@@ -17,16 +18,18 @@ class BookingController extends Controller
 {
     public function index(Request $request): View
     {
+        $status = BookingStatus::tryFrom($request->string('status')->toString());
         $bookings = $request->user()->bookings()
-            ->with('tourPackage:id,title,slug,start_date')
-            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->toString()))
+            ->with('tourPackage:id,title,slug,start_date,end_date')
+            ->when($status, fn ($query) => $query->where('status', $status->value))
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        return view('user.bookings.index', [
+        return view('User.bookings.index', [
             'bookings' => $bookings,
             'statuses' => BookingStatus::cases(),
+            'selectedStatus' => $status,
         ]);
     }
 
@@ -84,13 +87,23 @@ class BookingController extends Controller
     {
         $this->authorize('cancel', $booking);
 
+        $requiresRefund = $booking->payments()
+            ->where('status', PaymentStatus::VERIFIED->value)
+            ->exists();
+
+        $data = $request->validate([
+            'reason' => [$requiresRefund ? 'required' : 'nullable', 'string', 'max:500'],
+        ]);
+
         try {
-            $action->execute($booking, 'Dibatalkan oleh customer');
+            $action->execute($booking, $data['reason'] ?? 'Dibatalkan oleh customer');
         } catch (DomainException $e) {
             return back()->with('error', $e->getMessage());
         }
 
         return redirect()->route('user.bookings.show', $booking->code)
-            ->with('success', 'Booking berhasil dibatalkan.');
+            ->with('success', $requiresRefund
+                ? 'Booking dibatalkan. Permintaan refund telah dikirim dan menunggu diproses admin.'
+                : 'Booking berhasil dibatalkan.');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\TourGuide;
 use App\Actions\Booking\CancelBookingAction;
 use App\Enums\BookingStatus;
 use App\Enums\PaymentStatus;
+use App\Enums\RefundStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Payment;
@@ -196,6 +197,12 @@ class BookingController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        return back()->with('success', 'Booking dibatalkan dan kuota paket dikembalikan.');
+        $hasRefundRequest = $booking->payments()
+            ->where('refund_status', RefundStatus::REQUESTED->value)
+            ->exists();
+
+        return back()->with('success', $hasRefundRequest
+            ? 'Booking dibatalkan, kuota dikembalikan, dan permintaan refund dicatat untuk diproses admin.'
+            : 'Booking dibatalkan dan kuota paket dikembalikan.');
     }
 }

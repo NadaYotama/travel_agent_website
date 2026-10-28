@@ -31,7 +31,7 @@ class BookingPolicy
     }
 
     /**
-     * Customer hanya bisa membatalkan booking yang belum dibayar.
+     * Customer dapat membatalkan booking pending atau yang sudah dibayar agar refund bisa diajukan.
      * Staff bisa membatalkan selama belum selesai/dibatalkan.
      */
     public function cancel(User $user, Booking $booking): bool
@@ -44,7 +44,11 @@ class BookingPolicy
             ], true);
         }
 
-        return $this->isOwner($user, $booking) && $booking->status === BookingStatus::PENDING;
+        return $this->isOwner($user, $booking) && in_array($booking->status, [
+            BookingStatus::PENDING,
+            BookingStatus::PAID,
+            BookingStatus::CONFIRMED,
+        ], true);
     }
 
     /** Ulasan hanya setelah perjalanan selesai. */

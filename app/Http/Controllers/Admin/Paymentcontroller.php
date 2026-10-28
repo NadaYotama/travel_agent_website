@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\BookingStatus;
 use App\Enums\PaymentStatus;
+use App\Enums\RefundStatus;
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
 use App\Models\Payment;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -14,10 +16,7 @@ use Illuminate\Validation\Rule;
 
 class PaymentController extends Controller
 {
-    /**
-     * Daftar pembayaran. Tambahkan route:
-     * Route::get('payments', [Admin\PaymentController::class, 'index'])->name('payments.index');
-     */
+    /** Daftar pembayaran dan permintaan refund. */
     public function index(Request $request): View
     {
         $payments = Payment::query()
@@ -49,28 +48,39 @@ class PaymentController extends Controller
             'decision' => ['required', Rule::in(['approve', 'reject'])],
         ]);
 
-        if ($payment->status !== PaymentStatus::PENDING) {
-            return back()->with('error', 'Pembayaran ini sudah diproses sebelumnya.');
-        }
+        $result = DB::transaction(function () use ($payment, $data): ?string {
+            $booking = Booking::query()->whereKey($payment->booking_id)->lockForUpdate()->firstOrFail();
+            $lockedPayment = Payment::query()->whereKey($payment->id)->lockForUpdate()->firstOrFail();
 
-        $booking = $payment->booking;
+            if ($lockedPayment->status !== PaymentStatus::PENDING) {
+                return 'processed';
+            }
 
-        if ($data['decision'] === 'approve' && $booking->status === BookingStatus::CANCELLED) {
-            return back()->with('error', 'Booking sudah dibatalkan, pembayaran tidak dapat disetujui.');
-        }
+            if ($data['decision'] === 'approve' && $booking->status === BookingStatus::CANCELLED) {
+                return 'cancelled';
+            }
 
-        DB::transaction(function () use ($payment, $booking, $data) {
             if ($data['decision'] === 'approve') {
-                $payment->update([
-                    'status'  => PaymentStatus::VERIFIED->value,
-                    'paid_at' => $payment->paid_at ?? now(),
+                $lockedPayment->update([
+                    'status' => PaymentStatus::VERIFIED->value,
+                    'paid_at' => $lockedPayment->paid_at ?? now(),
                 ]);
 
                 $booking->update(['status' => BookingStatus::CONFIRMED->value]);
             } else {
-                $payment->update(['status' => PaymentStatus::REJECTED->value]);
+                $lockedPayment->update(['status' => PaymentStatus::REJECTED->value]);
             }
+
+            return null;
         });
+
+        if ($result === 'processed') {
+            return back()->with('error', 'Pembayaran ini sudah diproses sebelumnya.');
+        }
+
+        if ($result === 'cancelled') {
+            return back()->with('error', 'Booking sudah dibatalkan, pembayaran tidak dapat disetujui.');
+        }
 
         // Kirim notifikasi ke customer (aktifkan setelah Notification dibuat):
         // $booking->user->notify(new \App\Notifications\PaymentConfirmed($payment));
@@ -80,6 +90,42 @@ class PaymentController extends Controller
             $data['decision'] === 'approve'
                 ? 'Pembayaran disetujui dan booking dikonfirmasi.'
                 : 'Pembayaran ditolak.'
+        );
+    }
+
+    /** Catat hasil pemrosesan refund manual setelah dana dikembalikan di luar aplikasi. */
+    public function updateRefund(Request $request, Payment $payment): RedirectResponse
+    {
+        $data = $request->validate([
+            'decision' => ['required', Rule::in([RefundStatus::PROCESSED->value, RefundStatus::REJECTED->value])],
+            'refund_note' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $updated = DB::transaction(function () use ($payment, $data): bool {
+            $lockedPayment = Payment::query()->whereKey($payment->id)->lockForUpdate()->firstOrFail();
+
+            if ($lockedPayment->refund_status !== RefundStatus::REQUESTED->value) {
+                return false;
+            }
+
+            $lockedPayment->update([
+                'refund_status' => $data['decision'],
+                'refund_note' => $data['refund_note'],
+                'refund_processed_at' => $data['decision'] === RefundStatus::PROCESSED->value ? now() : null,
+            ]);
+
+            return true;
+        });
+
+        if (! $updated) {
+            return back()->with('error', 'Permintaan refund ini sudah diproses sebelumnya.');
+        }
+
+        return back()->with(
+            'success',
+            $data['decision'] === RefundStatus::PROCESSED->value
+                ? 'Refund ditandai telah diproses.'
+                : 'Permintaan refund ditolak.'
         );
     }
 }

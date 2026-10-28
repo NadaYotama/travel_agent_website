@@ -4,17 +4,17 @@
 @section('header', 'Laporan Manager')
 
 @section('content')
-<div class="card bg-dark text-white m-b-20">
-    <div class="card-body d-flex flex-wrap align-items-center">
-        <div>
+<!-- <div class="card bg-dark text-white m-b-20">
+    <div class="card-body d-flex flex-wrap align-items-center"> -->
+        <!-- <div>
             <h3 class="card-title text-white font-weight-bold mb-1">{{ $vendor->company_name ?? 'Manager' }}</h3>
             <p class="card-text text-muted mb-0">{{ $vendor->address ?? 'Laporan hanya mencakup layanan manager ini.' }}</p>
-        </div>
-        <a href="{{ route('manager.services.index') }}" class="ml-auto btn btn-outline-light m-t-10">
+        </div> -->
+        <!-- <a href="{{ route('manager.services.index') }}" class="ml-auto btn btn-outline-light m-t-10">
             <i class="mdi mdi-hotel m-r-5"></i> Kelola Layanan
-        </a>
-    </div>
-</div>
+        </a> -->
+    <!-- </div>
+</div> -->
 
 <div class="card bg-light m-b-20">
     <div class="card-body">
@@ -148,7 +148,7 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-6">
+    <!-- <div class="col-lg-6">
         <div class="card">
             <div class="card-body">
                 <h4 class="card-title">Layanan Manager</h4>
@@ -167,7 +167,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <div class="card">
     <div class="card-body">

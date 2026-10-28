@@ -104,14 +104,14 @@
                             </a>
                         </li>
 
-                        @if (Route::has('manager.services.index'))
+                        <!-- @if (Route::has('manager.services.index'))
                         <li class="sidebar-item {{ request()->routeIs('manager.services.*') ? 'selected' : '' }}">
                             <a class="sidebar-link waves-effect waves-dark sidebar-link" href="{{ route('manager.services.index') }}" aria-expanded="false">
                                 <i class="mdi mdi-hotel"></i>
                                 <span class="hide-menu">Layanan Saya</span>
                             </a>
                         </li>
-                        @endif
+                        @endif -->
 
                         <li class="sidebar-item border-top border-secondary m-t-15 p-t-15">
                             <a class="sidebar-link waves-effect waves-dark sidebar-link text-danger" href="javascript:void(0)" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

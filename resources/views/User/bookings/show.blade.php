@@ -45,15 +45,60 @@
             @endforeach
         </ol>
 
+        @php
+            $refundPayments = $booking->payments->filter(fn ($payment) => $payment->refund_status !== null);
+        @endphp
+        @if ($refundPayments->isNotEmpty())
+            <section class="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4" aria-labelledby="refund-heading">
+                <h2 id="refund-heading" class="font-display font-bold text-amber-900">Status refund</h2>
+                @foreach ($refundPayments as $payment)
+                    <div class="mt-2 text-sm text-amber-900">
+                        <p>
+                            @switch($payment->refund_status)
+                                @case('requested')
+                                    Permintaan refund sedang menunggu diproses admin.
+                                    @break
+                                @case('processed')
+                                    Refund telah diproses admin.
+                                    @break
+                                @case('rejected')
+                                    Permintaan refund tidak disetujui. Silakan hubungi admin untuk informasi lebih lanjut.
+                                    @break
+                            @endswitch
+                            (Rp {{ number_format($payment->amount, 0, ',', '.') }})
+                        </p>
+                        @if ($payment->refund_note)
+                            <p class="mt-1 text-xs text-amber-800">Catatan admin: {{ $payment->refund_note }}</p>
+                        @endif
+                    </div>
+                @endforeach
+                <p class="mt-3 text-xs text-amber-800">Pengajuan refund tidak berarti dana sudah dikembalikan. Admin akan memperbarui status setelah memproses pengembalian dana.</p>
+            </section>
+        @endif
+
         <div class="mt-7 flex flex-wrap gap-3">
             @if ($booking->status === \App\Enums\BookingStatus::PENDING)
                 <a href="{{ route('user.payments.create', $booking->code) }}" class="rounded-xl bg-[var(--lagoon)] px-5 py-3 text-sm font-bold text-white hover:bg-[var(--lagoon-dark)]">
                     Lanjutkan pembayaran
                 </a>
-                <form method="POST" action="{{ route('user.bookings.cancel', $booking->code) }}" onsubmit="return confirm('Batalkan pesanan ini?')">
+            @endif
+            @if (in_array($booking->status, [\App\Enums\BookingStatus::PENDING, \App\Enums\BookingStatus::PAID, \App\Enums\BookingStatus::CONFIRMED], true))
+                @php
+                    $hasVerifiedPayment = $booking->payments->contains(fn ($payment) => $payment->status === \App\Enums\PaymentStatus::VERIFIED);
+                @endphp
+                <form method="POST" action="{{ route('user.bookings.cancel', $booking->code) }}" class="w-full space-y-3 rounded-2xl border border-red-100 bg-red-50/50 p-4 sm:w-auto sm:min-w-80" onsubmit="return confirm('{{ $hasVerifiedPayment ? 'Booking akan dibatalkan dan permintaan refund dikirim ke admin. Lanjutkan?' : 'Batalkan pesanan ini?' }}')">
                     @csrf
-                    <button type="submit" class="rounded-xl border border-red-200 px-5 py-3 text-sm font-semibold text-red-700 hover:bg-red-50">
-                        Batalkan pesanan
+                    @if ($hasVerifiedPayment)
+                        <label for="cancel-reason" class="block text-sm font-semibold text-slate-700">Alasan pembatalan dan refund</label>
+                        <textarea id="cancel-reason" name="reason" rows="3" maxlength="500" required
+                                  class="w-full rounded-xl border-slate-200 text-sm focus:border-red-400 focus:ring-red-300"
+                                  placeholder="Jelaskan alasan pembatalan...">{{ old('reason') }}</textarea>
+                        @error('reason')
+                            <p class="text-sm text-red-700" role="alert">{{ $message }}</p>
+                        @enderror
+                    @endif
+                    <button type="submit" class="w-full rounded-xl border border-red-200 bg-white px-5 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100">
+                        {{ $hasVerifiedPayment ? 'Batalkan & ajukan refund' : 'Batalkan pesanan' }}
                     </button>
                 </form>
             @endif

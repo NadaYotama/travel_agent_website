@@ -29,22 +29,26 @@
 
     {{-- Kartu Statistik Pesanan --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-8">
-        <div class="stat-card">
+        <a href="{{ route('user.bookings.index') }}" class="stat-card block transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--lagoon)]">
             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Pesanan</p>
             <p class="font-display text-3xl font-bold text-slate-800 mt-2">{{ $stats['total'] ?? 0 }}</p>
-        </div>
-        <div class="stat-card">
+            <span class="mt-2 block text-xs font-semibold text-[var(--lagoon)]">Lihat semua riwayat &rarr;</span>
+        </a>
+        <a href="{{ route('user.bookings.index', ['status' => \App\Enums\BookingStatus::PENDING->value]) }}" class="stat-card block transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-amber-400">
             <p class="text-xs font-semibold text-amber-600 uppercase tracking-wider">Menunggu Bayar</p>
             <p class="font-display text-3xl font-bold text-amber-600 mt-2">{{ $stats['awaiting_payment'] ?? 0 }}</p>
-        </div>
-        <div class="stat-card">
+            <span class="mt-2 block text-xs font-semibold text-amber-700">Lanjutkan pembayaran &rarr;</span>
+        </a>
+        <a href="{{ route('user.bookings.index', ['status' => \App\Enums\BookingStatus::PAID->value]) }}" class="stat-card block transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-sky-400">
             <p class="text-xs font-semibold text-sky-600 uppercase tracking-wider">Verifikasi</p>
             <p class="font-display text-3xl font-bold text-sky-600 mt-2">{{ $stats['in_verification'] ?? 0 }}</p>
-        </div>
-        <div class="stat-card">
+            <span class="mt-2 block text-xs font-semibold text-sky-700">Lihat pesanan &rarr;</span>
+        </a>
+        <a href="{{ route('user.bookings.index', ['status' => \App\Enums\BookingStatus::COMPLETED->value]) }}" class="stat-card block transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-400">
             <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Selesai</p>
             <p class="font-display text-3xl font-bold text-emerald-600 mt-2">{{ $stats['completed'] ?? 0 }}</p>
-        </div>
+            <span class="mt-2 block text-xs font-semibold text-emerald-700">Lihat riwayat &rarr;</span>
+        </a>
     </div>
 
     {{-- Konten Utama: Perjalanan Mendatang & Riwayat --}}
@@ -100,14 +104,28 @@
                             };
                         @endphp
                         <div class="p-3 rounded-lg border border-slate-100 text-sm">
-                            <p class="font-semibold text-slate-800 truncate">{{ $b->tourPackage->title ?? 'Pesanan' }}</p>
+                            <a href="{{ route('user.bookings.show', $b->code) }}" class="font-semibold text-slate-800 truncate hover:text-[var(--lagoon)]">
+                                {{ $b->tourPackage->title ?? 'Pesanan' }}
+                            </a>
                             <div class="flex items-center justify-between text-xs text-slate-500 mt-1">
                                 <span>{{ $b->created_at->format('d/m/Y') }}</span>
                                 <span class="inline-flex rounded-full px-2.5 py-1 font-semibold {{ $statusClass }}">{{ ucfirst($status) }}</span>
                             </div>
+                            @if ($b->status === \App\Enums\BookingStatus::PENDING)
+                                <a href="{{ route('user.payments.create', $b->code) }}" class="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-[var(--lagoon)] px-3 py-2 text-xs font-bold text-white transition hover:bg-[var(--lagoon-dark)]">
+                                    Lanjutkan pembayaran
+                                </a>
+                            @else
+                                <a href="{{ route('user.bookings.show', $b->code) }}" class="mt-3 inline-flex text-xs font-semibold text-[var(--lagoon)] hover:underline">
+                                    Lihat detail pesanan
+                                </a>
+                            @endif
                         </div>
                     @endforeach
                 </div>
+                <a href="{{ route('user.bookings.index') }}" class="mt-4 inline-flex text-sm font-semibold text-[var(--lagoon)] hover:underline">
+                    Lihat semua riwayat pesanan &rarr;
+                </a>
             @else
                 <p class="text-center py-8 text-slate-400 text-sm">Belum ada riwayat pemesanan.</p>
             @endif

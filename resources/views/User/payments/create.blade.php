@@ -61,22 +61,33 @@
                 message.textContent = 'Menyiapkan pembayaran...';
 
                 try {
-                    const response = await fetch(@json(route('user.payments.midtrans', $booking->code)), {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        },
-                    });
-                    const data = await response.json();
+                    let response;
+                    try {
+                        response = await fetch(@json(route('user.payments.midtrans', $booking->code, false)), {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            },
+                        });
+                    } catch {
+                        throw new Error('Tidak dapat terhubung ke server. Pastikan URL ngrok masih aktif, lalu muat ulang halaman.');
+                    }
+
+                    let data;
+                    try {
+                        data = await response.json();
+                    } catch {
+                        throw new Error('Server memberikan respons yang tidak valid. Muat ulang halaman dan coba lagi.');
+                    }
 
                     if (!response.ok) {
                         throw new Error(data.message || 'Pembayaran tidak dapat disiapkan. Silakan coba lagi.');
                     }
 
                     window.snap.pay(data.snap_token, {
-                        onSuccess: () => window.location.assign(@json(route('user.bookings.show', $booking->code)) + '?payment=success'),
-                        onPending: () => window.location.assign(@json(route('user.bookings.show', $booking->code)) + '?payment=pending'),
+                        onSuccess: () => window.location.assign(@json(route('user.bookings.show', $booking->code, false)) + '?payment=success'),
+                        onPending: () => window.location.assign(@json(route('user.bookings.show', $booking->code, false)) + '?payment=pending'),
                         onError: () => {
                             message.textContent = 'Pembayaran gagal diproses. Silakan coba lagi.';
                             button.disabled = false;

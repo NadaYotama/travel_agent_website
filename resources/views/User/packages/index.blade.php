@@ -20,19 +20,46 @@
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     {{-- Search & Filter Section --}}
-    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-6 mb-8">
-        <form action="{{ route('user.packages.index') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+    <div class="mb-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-card">
+        <div class="flex items-center gap-3 border-b border-slate-100 bg-slate-50/80 px-5 py-4 sm:px-6">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-[var(--lagoon)]">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/>
+                </svg>
+            </span>
             <div>
-                <label for="q" class="block text-xs font-semibold text-slate-700 mb-1">Cari Kata Kunci</label>
-                <input type="text" name="q" id="q" value="{{ request('q') }}" placeholder="Judul paket / kota..."
-                       class="w-full text-sm rounded-xl border-slate-200 focus:border-[var(--lagoon)] focus:ring-[var(--lagoon)]">
+                <h2 class="font-display text-base font-bold text-[var(--ink)]">Temukan paket yang cocok</h2>
+                <p class="mt-0.5 text-xs text-slate-500">Atur pencarian sesuai rencana liburan Anda.</p>
+            </div>
+        </div>
+
+        <form action="{{ route('user.packages.index') }}" method="GET" class="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-12 lg:items-end">
+            <div class="lg:col-span-12">
+                <label for="q" class="mb-2 block text-sm font-bold text-[var(--ink)]">Cari paket wisata</label>
+                <p id="q-help" class="mb-3 text-xs text-slate-500">Masukkan nama paket atau kota tujuan yang ingin Anda kunjungi.</p>
+                <div class="group flex items-center rounded-2xl border border-slate-200 bg-slate-50 p-1.5 transition focus-within:border-[var(--lagoon)] focus-within:bg-white focus-within:ring-4 focus-within:ring-teal-500/10 hover:border-slate-300">
+                    <span class="ml-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[var(--lagoon)] shadow-sm sm:ml-3" aria-hidden="true">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.3-4.3m1.8-5.2a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
+                        </svg>
+                    </span>
+                    <input type="search" name="q" id="q" value="{{ request('q') }}" placeholder="Contoh: Yogyakarta, Bali, atau paket petualangan"
+                           aria-describedby="q-help"
+                           class="min-w-0 flex-1 border-0 bg-transparent px-3 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:ring-0">
+                    <button type="submit" class="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--ink)] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--lagoon)] sm:px-5">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
+                        </svg>
+                        Cari
+                    </button>
+                </div>
             </div>
 
-            <div>
-                <label for="destination_id" class="block text-xs font-semibold text-slate-700 mb-1">Destinasi</label>
+            <div class="lg:col-span-4">
+                <label for="destination_id" class="mb-1.5 block text-xs font-semibold text-slate-700">Destinasi</label>
                 <select name="destination_id" id="destination_id"
-                        class="w-full text-sm rounded-xl border-slate-200 focus:border-[var(--lagoon)] focus:ring-[var(--lagoon)]">
-                    <option value="">-- Semua Destinasi --</option>
+                        class="w-full rounded-xl border-slate-200 py-3 text-sm text-slate-800 focus:border-[var(--lagoon)] focus:ring-[var(--lagoon)]">
+                    <option value="">Semua destinasi</option>
                     @foreach($destinations as $dest)
                         <option value="{{ $dest->id }}" {{ request('destination_id') == $dest->id ? 'selected' : '' }}>
                             {{ $dest->name }}
@@ -41,30 +68,26 @@
                 </select>
             </div>
 
-            <div>
-                <label for="bulan" class="block text-xs font-semibold text-slate-700 mb-1">Bulan Keberangkatan</label>
+            <div class="lg:col-span-3">
+                <label for="bulan" class="mb-1.5 block text-xs font-semibold text-slate-700">Bulan keberangkatan</label>
                 <input type="month" name="bulan" id="bulan" value="{{ request('bulan') }}"
-                       class="w-full text-sm rounded-xl border-slate-200 focus:border-[var(--lagoon)] focus:ring-[var(--lagoon)]">
+                       class="w-full rounded-xl border-slate-200 py-3 text-sm text-slate-800 focus:border-[var(--lagoon)] focus:ring-[var(--lagoon)]">
             </div>
 
-            <div>
-                <label for="sort" class="block text-xs font-semibold text-slate-700 mb-1">Urutkan</label>
+            <div class="lg:col-span-3">
+                <label for="sort" class="mb-1.5 block text-xs font-semibold text-slate-700">Urutkan berdasarkan</label>
                 <select name="sort" id="sort"
-                        class="w-full text-sm rounded-xl border-slate-200 focus:border-[var(--lagoon)] focus:ring-[var(--lagoon)]">
-                    <option value="terdekat" {{ request('sort') == 'terdekat' ? 'selected' : '' }}>Jadwal Terdekat</option>
-                    <option value="termurah" {{ request('sort') == 'termurah' ? 'selected' : '' }}>Harga Termurah</option>
-                    <option value="termahal" {{ request('sort') == 'termahal' ? 'selected' : '' }}>Harga Termahal</option>
+                        class="w-full rounded-xl border-slate-200 py-3 text-sm text-slate-800 focus:border-[var(--lagoon)] focus:ring-[var(--lagoon)]">
+                    <option value="terdekat" {{ request('sort') == 'terdekat' ? 'selected' : '' }}>Jadwal terdekat</option>
+                    <option value="termurah" {{ request('sort') == 'termurah' ? 'selected' : '' }}>Harga termurah</option>
+                    <option value="termahal" {{ request('sort') == 'termahal' ? 'selected' : '' }}>Harga termahal</option>
                 </select>
             </div>
 
-            <div class="flex gap-2">
-                <button type="submit" class="w-full py-2.5 px-4 bg-[var(--ink)] hover:bg-[var(--lagoon)] text-white text-sm font-semibold rounded-xl transition duration-150 shadow-sm flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <span>Filter</span>
-                </button>
+            <div class="flex gap-2 sm:col-span-2 lg:col-span-2 lg:justify-end">
                 @if(request()->hasAny(['q', 'destination_id', 'bulan', 'peserta', 'sort']))
-                    <a href="{{ route('user.packages.index') }}" class="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-medium transition" title="Reset filter">
-                        ✕
+                    <a href="{{ route('user.packages.index') }}" class="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50" title="Reset filter">
+                        Reset
                     </a>
                 @endif
             </div>
